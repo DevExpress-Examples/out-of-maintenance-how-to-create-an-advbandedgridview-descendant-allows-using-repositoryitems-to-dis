@@ -1,3 +1,10 @@
+<!-- default file list -->
+*Files to look at*:
+
+* [CustomGridView.cs](./CS/GridView_RowPreview/CustomGridView.cs)
+* [Form1.cs](./CS/GridView_RowPreview/Form1.cs)
+* [Program.cs](./CS/GridView_RowPreview/Program.cs)
+<!-- default file list end -->
 # How to create an AdvBandedGridView descendant allows using RepositoryItems to display/edit Row Preview
 
 

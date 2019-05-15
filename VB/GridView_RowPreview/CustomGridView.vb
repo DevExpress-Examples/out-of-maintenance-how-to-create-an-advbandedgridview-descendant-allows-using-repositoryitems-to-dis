@@ -28,8 +28,6 @@
 ' You can find sample updates and versions for different programming languages here:
 ' http://www.devexpress.com/example=E2002
 
-
-Imports Microsoft.VisualBasic
 Imports System
 Imports System.Collections.Generic
 Imports System.Text
@@ -60,7 +58,9 @@ Imports DevExpress.XtraGrid.Views.BandedGrid.Handler
 Namespace CustomGrid_PreviewRow
 	Public Class CustomGridView
 		Inherits AdvBandedGridView
+
 		Protected fRowPreviewEdit As RepositoryItem
+'INSTANT VB NOTE: The field isRowPreviewSelected was renamed since Visual Basic does not allow fields to have the same name as other class members:
 		Private isRowPreviewSelected_Renamed As Boolean
 		Private postingEditorValue As Integer
 		Public Sub New()
@@ -92,7 +92,7 @@ Namespace CustomGrid_PreviewRow
 				Return "CustomGridView"
 			End Get
 		End Property
-		<Category("Appearance"), Description("Gets or sets the repository item specifying the editor used to show row preview."), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), TypeConverter("DevExpress.XtraGrid.TypeConverters.ColumnEditConverter, " & AssemblyInfo.SRAssemblyGridDesign), Editor("DevExpress.XtraGrid.Design.ColumnEditEditor, " & AssemblyInfo.SRAssemblyGridDesign, GetType(System.Drawing.Design.UITypeEditor))> _
+		<Category("Appearance"), Description("Gets or sets the repository item specifying the editor used to show row preview."), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), TypeConverter("DevExpress.XtraGrid.TypeConverters.ColumnEditConverter, " & AssemblyInfo.SRAssemblyGridDesign), Editor("DevExpress.XtraGrid.Design.ColumnEditEditor, " & AssemblyInfo.SRAssemblyGridDesign, GetType(System.Drawing.Design.UITypeEditor))>
 		Public Property PreviewRowEdit() As DevExpress.XtraEditors.Repository.RepositoryItem
 			Get
 				Return fRowPreviewEdit
@@ -114,7 +114,7 @@ Namespace CustomGrid_PreviewRow
 				End If
 			End Set
 		End Property
-		Protected Overrides Overloads Sub Dispose(ByVal disposing As Boolean)
+		Protected Overrides Sub Dispose(ByVal disposing As Boolean)
 			If PreviewRowEdit IsNot Nothing Then
 				PreviewRowEdit.Disconnect(Me)
 				Me.fRowPreviewEdit = Nothing
@@ -150,7 +150,7 @@ Namespace CustomGrid_PreviewRow
 			If ri Is Nothing Then
 				Return
 			End If
-			Dim bounds As Rectangle = (CType(ViewInfo, CustomGridViewInfo)).GetRowPreviewEditBounds(ri)
+			Dim bounds As Rectangle = CType(ViewInfo, CustomGridViewInfo).GetRowPreviewEditBounds(ri)
 			bounds.Offset(ri.PreviewBounds.Location)
 			UpdateEditor(PreviewRowEdit, New UpdateEditorInfoArgs(False, bounds, ri.AppearancePreview, GetRowPreviewValue(FocusedRowHandle), ElementsLookAndFeel, String.Empty, Nothing))
 		End Sub
@@ -169,10 +169,10 @@ Namespace CustomGrid_PreviewRow
 			End If
 			Try
 				Me.postingEditorValue += 1
-				If ActiveEditor Is Nothing OrElse (Not EditingValueModified) OrElse Me.fEditingCell IsNot Nothing Then
+				If ActiveEditor Is Nothing OrElse Not EditingValueModified OrElse Me.fEditingCell IsNot Nothing Then
 					Return result
 				End If
-				If causeValidation AndAlso (Not ValidateEditor()) Then
+				If causeValidation AndAlso Not ValidateEditor() Then
 					Return False
 				End If
 				SetRowPreviewValueCore(FocusedRowHandle, EditingValue)
@@ -204,9 +204,9 @@ Namespace CustomGrid_PreviewRow
 			Get
 				If PreviewRowEdit IsNot Nothing Then
 					Return True
-					Else
-						Return MyBase.IsAutoHeight
-					End If
+				Else
+					Return MyBase.IsAutoHeight
+				End If
 			End Get
 		End Property
 		Public Overrides Property FocusedColumn() As GridColumn
@@ -221,9 +221,10 @@ Namespace CustomGrid_PreviewRow
 			End Set
 		End Property
 	End Class
-   <ToolboxItem(True)> _
+   <ToolboxItem(True)>
    Public Class CustomGridControl
 	   Inherits GridControl
+
 		Public Sub New()
 			MyBase.New()
 		End Sub
@@ -237,6 +238,7 @@ Namespace CustomGrid_PreviewRow
    End Class
 	Public Class CustomGridPainter
 		Inherits BandedGridPainter
+
 		Public Sub New(ByVal view As AdvBandedGridView)
 			MyBase.New(view)
 		End Sub
@@ -247,7 +249,7 @@ Namespace CustomGrid_PreviewRow
 		End Property
 		Protected Overrides Sub DrawRowPreview(ByVal e As GridViewDrawArgs, ByVal ri As GridDataRowInfo)
 
-			Dim item As RepositoryItem = (CType(e.ViewInfo.View, CustomGridView)).PreviewRowEdit
+			Dim item As RepositoryItem = CType(e.ViewInfo.View, CustomGridView).PreviewRowEdit
 			If item Is Nothing Then
 				MyBase.DrawRowPreview(e, ri)
 			Else
@@ -257,11 +259,12 @@ Namespace CustomGrid_PreviewRow
 		Private Sub DrawRowPreviewEditor(ByVal e As GridViewDrawArgs, ByVal ri As GridDataRowInfo, ByVal item As RepositoryItem)
 			Dim info As New GridCellInfo(Nothing, ri, ri.PreviewBounds)
 			info.Editor = item
-			DrawCellEdit(e, (CType(e.ViewInfo, CustomGridViewInfo)).GetRowPreviewViewInfo(e, ri), info, ri.AppearancePreview, False)
+			DrawCellEdit(e, CType(e.ViewInfo, CustomGridViewInfo).GetRowPreviewViewInfo(e, ri), info, ri.AppearancePreview, False)
 		End Sub
 	End Class
 	Public Class CustomGridViewInfo
 		Inherits AdvBandedGridViewInfo
+
 		Protected Overrides Sub CalcMinBandRowHeight(ByVal bandHeight As Integer)
 			If Painter IsNot Nothing Then
 			MyBase.CalcMinBandRowHeight(bandHeight)
@@ -305,9 +308,7 @@ Namespace CustomGrid_PreviewRow
 		End Function
 		Public Overridable Function GetRowPreviewEditBounds(ByVal ri As GridDataRowInfo) As Rectangle
 			Dim r As New Rectangle(New Point(0, 0), ri.PreviewBounds.Size)
-			r.Inflate(-GridRowPreviewPainter.PreviewTextIndent, -GridRowPreviewPainter.PreviewTextVIndent)
-			r.X += ri.PreviewIndent
-			r.Width -= ri.PreviewIndent
+			r.Inflate(-Me.Painter.ElementsPainter.RowPreview.GetPreviewTextHorizontalPadding(Me), -Me.Painter.ElementsPainter.RowPreview.GetPreviewTextVerticalPadding(Me))
 			Return r
 		End Function
 		Public Overrides Function CalcRowPreviewHeight(ByVal rowHandle As Integer) As Integer
@@ -319,7 +320,7 @@ Namespace CustomGrid_PreviewRow
 			End If
 		End Function
 		Protected Overridable Function CalcRowPreviewEditorHeight(ByVal rowHandle As Integer, ByVal item As RepositoryItem) As Integer
-			If (Not View.OptionsView.ShowPreview) OrElse View.IsGroupRow(rowHandle) OrElse View.IsFilterRow(rowHandle) Then
+			If Not View.OptionsView.ShowPreview OrElse View.IsGroupRow(rowHandle) OrElse View.IsFilterRow(rowHandle) Then
 				Return 0
 			End If
 			Dim res As Integer = (If(View.OptionsView.ShowPreviewRowLines <> DevExpress.Utils.DefaultBoolean.False, 1, 0))
@@ -332,13 +333,13 @@ Namespace CustomGrid_PreviewRow
 				Dim ha As IHeightAdaptable = TryCast(fRowPreviewViewInfo, IHeightAdaptable)
 				If ha IsNot Nothing Then
 					fRowPreviewViewInfo.EditValue = View.GetRowPreviewValue(rowHandle)
-					res = ha.CalcHeight(GInfo.Cache, Me.CalcRowPreviewWidth(rowHandle) - Me.PreviewIndent - GridRowPreviewPainter.PreviewTextIndent * 2)
+					res = ha.CalcHeight(GInfo.Cache, Me.CalcRowPreviewWidth(rowHandle) - Me.Painter.ElementsPainter.RowPreview.GetPreviewIndent(Me) - Me.Painter.ElementsPainter.RowPreview.GetPreviewTextHorizontalPadding(Me))
 				End If
 				res = Math.Max(fRowPreviewViewInfo.CalcMinHeight(g), res)
 			Finally
 				GInfo.ReleaseGraphics()
 			End Try
-			res += GridRowPreviewPainter.PreviewTextVIndent * 2
+			res += Me.Painter.ElementsPainter.RowPreview.GetPreviewTextVerticalPadding(Me) * 2
 			Return res
 		End Function
 		Protected Overrides Sub CalcRowHitInfo(ByVal pt As Point, ByVal ri As GridRowInfo, ByVal hi As GridHitInfo)
@@ -347,6 +348,7 @@ Namespace CustomGrid_PreviewRow
 	End Class
 	Public Class CustomGridHandler
 		Inherits BandedGridHandler
+
 		Public Sub New(ByVal gridView As AdvBandedGridView)
 			MyBase.New(gridView)
 		End Sub
@@ -356,6 +358,7 @@ Namespace CustomGrid_PreviewRow
 	End Class
 	Public Class CustomGridRegularRowNavigator
 		Inherits GridRegularRowNavigator
+
 		Public Sub New(ByVal handler As GridHandler)
 			MyBase.New(handler)
 		End Sub
@@ -379,6 +382,7 @@ Namespace CustomGrid_PreviewRow
 	End Class
 	Public Class CustomGridInfoRegistrator
 		Inherits AdvBandedGridInfoRegistrator
+
 		Public Sub New()
 			MyBase.New()
 		End Sub
